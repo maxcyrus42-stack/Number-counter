@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Bhupi Master</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#101010;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.app{max-width:1050px;margin:auto;padding:10px 18px 24px}
+.header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;padding:2px 0 10px}
+.headbtn{width:82px;height:78px;border:1px solid #d9dfe7;border-radius:17px;background:#fff;font-size:42px;color:#164775;box-shadow:0 2px 8px #00000008}
+.logo{text-align:center;flex:1}.logo h1{margin:0;font-size:48px;line-height:1;font-weight:900;letter-spacing:-2px}.blue{color:#1266dc}.logo .crown{font-size:58px;vertical-align:8px;margin-right:7px}.tag{font-size:22px;color:#555d69;font-weight:700;letter-spacing:1.3px}
+.input{margin-top:12px;border:2px solid #e1e5eb;border-radius:20px;padding:16px;display:grid;grid-template-columns:145px 1fr 235px 235px;gap:16px;align-items:center;box-shadow:0 2px 10px #00000006}
+.inputlabel{font-size:31px;font-weight:850;line-height:1.05}.input input{height:88px;border:2px solid #cbd2dc;border-radius:15px;font-size:25px;padding:0 20px;outline:none}.input input::placeholder{color:#9da3ad}
+.btn{height:88px;border:0;border-radius:18px;font-size:29px;font-weight:850}.add{background:#08bd70;color:#fff}.undo{background:#f12f35;color:#fff}.plus{font-size:48px;vertical-align:-5px;margin-left:10px}.back{font-size:42px;vertical-align:-4px;margin-right:10px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:13px 5px}
+.card{height:126px;border-radius:20px;border:2px solid;display:flex;flex-direction:column;align-items:center;justify-content:center}.card b{font-size:27px}.card strong{font-size:50px;margin-top:2px}.total{background:#eaf6ff;border-color:#d5e9fa;color:#17458e}.cut{background:#fff0f2;border-color:#ffd5dc;color:#ac2436}.res{background:#eafbf3;border-color:#c8f0dc;color:#08653c}.copytop{background:#fff8e8;border-color:#f4dfaa;color:#111}
+.table{border:2px solid #e1e5eb;border-radius:20px;padding:13px}.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}.num{height:67px;border:2px solid #e0e3e8;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:700}.num.active{background:#ecfaf3;border-color:#bde9d2}.num small{font-size:12px;color:#168255;margin-left:5px}
+.result{display:grid;grid-template-columns:1fr 220px;gap:13px;margin-top:13px}.resultbox{border:2px solid #e1e5eb;border-radius:18px;padding:16px;min-height:118px}.rtitle{font-size:26px;font-weight:850}.rsub{font-size:19px;color:#747c89;margin-top:9px}.copy{border:2px solid #ded5ff;background:#f5efff;color:#35218e;border-radius:18px;font-size:26px;font-weight:850}
+.bottom{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}.bottom button{height:128px;border-radius:17px;border:2px solid #dfe3e9;font-size:25px;font-weight:800;background:#fff}.home{background:#2386ed!important;color:#fff;border-color:#2386ed!important}.clearall{background:#fff0f2!important;color:#a51e31;border-color:#f5bbc5!important}.stats{background:#eafbf3!important;color:#075b37;border-color:#bfead5!important}
+textarea{width:100%;height:52px;border:0;outline:0;resize:none;background:transparent;font:600 16px ui-monospace,monospace}
+@media(max-width:760px){
+.app{padding:8px 10px}.headbtn{width:62px;height:58px;font-size:31px}.logo h1{font-size:32px}.logo .crown{font-size:39px}.tag{font-size:13px}.input{grid-template-columns:1fr 1fr;padding:13px;gap:10px}.inputlabel{font-size:27px}.input input{grid-column:1/-1;height:66px}.btn{height:64px;font-size:21px}.cards{grid-template-columns:1fr 1fr;margin:10px 0}.card{height:105px}.card b{font-size:21px}.card strong{font-size:39px}.grid{gap:4px}.num{height:45px;font-size:16px;border-radius:10px}.result{grid-template-columns:1fr}.copy{height:65px}.bottom{gap:7px}.bottom button{height:85px;font-size:17px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<button class="headbtn" aria-label="menu">☰</button>
+<div class="logo"><h1><span class="crown">♛</span><span class="blue">BHUPI</span> MASTER</h1><div class="tag">PLAY • TRACK • ANALYZE • WIN</div></div>
+<button class="headbtn" aria-label="settings">⚙</button>
+</header>
+
+<section class="input">
+<div class="inputlabel">Enter<br>Number</div>
+<input id="entry" placeholder="1 - 100">
+<button class="btn add" onclick="add()">Add <span class="plus">＋</span></button>
+<button class="btn undo" onclick="undo()"><span class="back">↶</span> Undo</button>
+</section>
+
+<section class="cards">
+<div class="card total"><b>Total Times</b><strong id="total">0</strong></div>
+<div class="card cut"><b>Cutting</b><strong id="cut">0</strong></div>
+<div class="card res"><b>Result</b><strong id="after">--</strong></div>
+<button class="card copytop" onclick="copyResult()"><strong style="font-size:38px">▢</strong><b>Copy</b></button>
+</section>
+
+<section class="table"><div class="grid" id="grid"></div></section>
+
+<section class="result">
+<div class="resultbox">
+<div class="rtitle">💬 &nbsp;Result Message</div>
+<div class="rsub">Your result will show here...</div>
+<textarea id="out" readonly></textarea>
+</div>
+<button class="copy" onclick="copyResult()">▢ &nbsp; Copy</button>
+</section>
+
+<nav class="bottom">
+<button class="home">⌂<br>Home</button>
+<button onclick="alert('History is available through Undo in this version.')">◷<br>History</button>
+<button class="clearall" onclick="clearAll()">▣<br>Clear All</button>
+<button class="stats">▥<br>Statistics</button>
+</nav>
+</div>
+
+<script>
+let d=JSON.parse(localStorage.getItem('bm_data')||'{}'), hist=[];
+const grid=document.getElementById('grid');
+for(let i=1;i<=100;i++){let e=document.createElement('div');e.className='num';e.id='n'+i;e.textContent=i;grid.appendChild(e)}
+function parse(s){
+ let m=s.match(/\(\s*(\d+)\s*\)|\binto\s*(\d+)\b|=\s*(\d+)/i); if(!m)return null;
+ let times=Number(m[1]||m[2]||m[3]), before=s.slice(0,m.index);
+ let nums=before.split(/[^0-9]+/).filter(x=>/^\d{2}$/.test(x)||x==='100').map(x=>String(Number(x)));
+ let plat=/\bplat\b/i.test(s), all=[...new Set(nums)];
+ if(plat) nums.forEach(x=>{if(x!=='100'){let q=x.padStart(2,'0'),r=String(Number(q[1]+q[0]));if(!all.includes(r))all.push(r)}})
+ return {times,nums:all}
+}
+function add(){
+ let v=document.getElementById('entry').value.trim();if(!v)return;
+ let p=parse(v);if(!p){alert('Number ke saath times likhein, jaise (30), into 30 ya =30');return}
+ hist.push(JSON.stringify(d));p.nums.forEach(n=>d[n]=(d[n]||0)+p.times);
+ localStorage.setItem('bm_data',JSON.stringify(d));document.getElementById('entry').value='';render()
+}
+function undo(){if(!hist.length)return;d=JSON.parse(hist.pop());localStorage.setItem('bm_data',JSON.stringify(d));render()}
+function clearAll(){if(!confirm('Saara data clear karein?'))return;hist.push(JSON.stringify(d));d={};localStorage.setItem('bm_data','{}');render()}
+function render(){
+ let t=0,cut=Number(localStorage.getItem('bm_cut')||0), parts=[],after=0;
+ for(let i=1;i<=100;i++){let v=Number(d[i]||0);t+=v;let a=Math.max(0,v-cut);after+=a;let e=document.getElementById('n'+i);e.className='num'+(v?' active':'');e.innerHTML=i+(v?'<small>'+v+'</small>':'');if(a>0)parts.push(String(i).padStart(2,'0')+'='+a)}
+ document.getElementById('total').textContent=t;document.getElementById('cut').textContent=cut;document.getElementById('after').textContent=after||'--';document.getElementById('out').value=parts.join(',');
+}
+function copyResult(){
+ let s=document.getElementById('out').value;if(!s){alert('Cutting ke baad koi number nahi hai.');return}
+ navigator.clipboard?.writeText(s).then(()=>alert('Copied!')).catch(()=>{let x=document.getElementById('out');x.select();document.execCommand('copy');alert('Copied!')})
+}
+render();
+</script>
+</body>
+</html>
