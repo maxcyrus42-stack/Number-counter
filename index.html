@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Bhupi Master</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f6fa;color:#111}
+.wrap{max-width:760px;margin:auto;padding:0 10px 28px}
+.header{background:#173f73;color:#fff;margin:0 -10px 14px;padding:20px 18px 18px;border-radius:0 0 18px 18px;box-shadow:0 3px 10px #0002}
+.header h1{margin:0;font-size:30px;text-align:center}
+.header p{margin:5px 0 0;text-align:center;opacity:.85;font-size:14px}
+.inputCard,.card{background:#fff;border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 2px 8px #00000012}
+textarea{width:100%;min-height:105px;border:1px solid #ccd3dc;border-radius:12px;padding:12px;font-size:17px;resize:vertical;outline:none}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{border:0;border-radius:11px;padding:12px 16px;font-size:16px;font-weight:700;cursor:pointer}
+.add{background:#0a9b57;color:#fff;flex:1}.undo{background:#f39a08;color:#fff}.clear{background:#e54848;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);border-top:1px solid #aeb7c2;border-left:1px solid #aeb7c2;border-radius:10px;overflow:hidden;background:#fff}
+.cell{min-height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #aeb7c2;border-bottom:1px solid #aeb7c2;font-weight:700;font-size:16px}
+.cell .count{font-size:13px;margin-top:4px;color:#173f73;font-weight:800}
+.cell.active{background:#e8f7ef}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{border-radius:14px;padding:14px;background:#fff;box-shadow:0 2px 7px #00000010}
+.stat .label{font-size:14px;font-weight:700;color:#555}.stat .value{font-size:27px;font-weight:800;margin-top:4px}
+.total .value{color:#173f73}.remain .value{color:#0a9b57}
+.cut input{width:100%;margin-top:7px;border:1px solid #ccd3dc;border-radius:10px;padding:10px;font-size:20px;font-weight:700}
+.resultTitle{font-size:18px;font-weight:800;margin-bottom:9px}
+.result{display:flex;gap:9px;align-items:stretch}
+.result textarea{min-height:160px;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px}
+.copy{background:#1769e0;color:#fff;min-width:115px}
+.note{font-size:12px;color:#666;line-height:1.4;margin:10px 2px}
+@media(max-width:430px){.cell{min-height:48px;font-size:14px}.cell .count{font-size:11px}.result{flex-direction:column}.copy{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header"><h1>Bhupi Master</h1><p>Number Counter • Cutting • Result</p></div>
+
+  <div class="inputCard">
+    <textarea id="input" placeholder="Example:
+55 into 300
+76,67 into 50
+12,13.15 18,20=60
+72 57,67.88-55,90,89 (50)"></textarea>
+    <div class="row">
+      <button class="add" onclick="addData()">＋ Add Numbers</button>
+      <button class="undo" onclick="undo()">↶ Undo</button>
+      <button class="clear" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="note">Valid number = exactly 2 digits (01–99). 100 bhi valid hai. Times: (50), into 50, ya =50. Separators: comma, dot, space, hyphen.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="stats">
+    <div class="stat total"><div class="label">Total Times</div><div class="value" id="total">0</div></div>
+    <div class="stat remain"><div class="label">Remaining Total</div><div class="value" id="remaining">0</div></div>
+  </div>
+
+  <div class="stat cut" style="margin-top:10px">
+    <div class="label">Cutting</div>
+    <input id="cutting" type="number" min="0" step="1" value="0" oninput="render()">
+  </div>
+
+  <div class="card">
+    <div class="resultTitle">Result Message (After Cutting)</div>
+    <div class="result">
+      <textarea id="result" readonly></textarea>
+      <button class="copy" onclick="copyResult()">Copy Message</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data=JSON.parse(localStorage.getItem('bhupiMasterData')||'{}');
+let history=JSON.parse(localStorage.getItem('bhupiMasterHistory')||'[]');
+
+function save(){localStorage.setItem('bhupiMasterData',JSON.stringify(data));localStorage.setItem('bhupiMasterHistory',JSON.stringify(history));}
+
+function parseInput(raw){
+  raw=raw.replace(/\r/g,' ').trim();
+  // Find a final times value in each line. Supports "(50)", "into 50", "=50".
+  const lines=raw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  const entries=[];
+  for(const line of lines){
+    let m=line.match(/\(\s*(\d+)\s*\)\s*$/);
+    let before, times;
+    if(m){times=Number(m[1]);before=line.slice(0,m.index);}
+    else{
+      m=line.match(/\binto\s*(\d+)\s*$/i);
+      if(m){times=Number(m[1]);before=line.slice(0,m.index);}
+      else{
+        m=line.match(/=\s*(\d+)\s*$/);
+        if(m){times=Number(m[1]);before=line.slice(0,m.index);}
+        else continue;
+      }
+    }
+    if(!Number.isFinite(times)) continue;
+    // Accept only exactly two-digit pairs, plus 100 as requested.
+    const tokens=before.split(/[^0-9]+/).filter(Boolean);
+    const nums=tokens.filter(t=>/^\d{2}$/.test(t) || t==='100');
+    entries.push({nums,times});
+  }
+  return entries;
+}
+
+function addData(){
+  const raw=document.getElementById('input').value.trim();
+  if(!raw){return}
+  const entries=parseInput(raw);
+  if(!entries.length){alert('Times format use karein: (50), into 50, ya =50');return}
+  const before=JSON.stringify(data);
+  for(const e of entries){
+    for(let n of e.nums){
+      if(n.length===2)n=String(Number(n)); // 01 and 1 same key
+      if(Number(n)>=1 && Number(n)<=100)data[n]=(data[n]||0)+e.times;
+    }
+  }
+  history.push(before);
+  if(history.length>50)history.shift();
+  save(); document.getElementById('input').value=''; render();
+}
+
+function undo(){
+  if(!history.length){return}
+  data=JSON.parse(history.pop()); save(); render();
+}
+
+function clearAll(){
+  if(confirm('Saara data clear karein?')){
+    history.push(JSON.stringify(data)); data={}; save(); render();
+  }
+}
+
+function render(){
+  let total=0;
+  for(const k in data) total+=Number(data[k])||0;
+  const cut=Math.max(0,Number(document.getElementById('cutting').value)||0);
+  let remain=0, lines=[];
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  for(let i=1;i<=100;i++){
+    const val=Number(data[String(i)]||0);
+    const after=Math.max(0,val-cut);
+    total += 0;
+    remain += after;
+    if(after>0) lines.push(String(i).padStart(2,'0')+'='+after);
+    const c=document.createElement('div');
+    c.className='cell'+(val?' active':'');
+    c.innerHTML='<span>'+String(i).padStart(2,'0')+'</span><span class="count">'+val+'</span>';
+    grid.appendChild(c);
+  }
+  document.getElementById('total').textContent=total;
+  document.getElementById('remaining').textContent=remain;
+  document.getElementById('result').value=lines.join('\\n');
+}
+
+async function copyResult(){
+  const text=document.getElementById('result').value;
+  if(!text){alert('Copy karne ke liye koi result nahi hai.');return}
+  try{await navigator.clipboard.writeText(text);alert('Message copied!')}
+  catch(e){const t=document.getElementById('result');t.removeAttribute('readonly');t.select();document.execCommand('copy');t.setAttribute('readonly','');alert('Message copied!')}
+}
+render();
+</script>
+</body>
+</html>
